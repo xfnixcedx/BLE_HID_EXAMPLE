@@ -20,8 +20,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # GitHub Ubuntu runners already include the Android SDK.
+      # Avoid setup-android license prompts for optional Google TV add-ons.
       - name: Apply experimental Fire TV BLE patch
         run: python3 patch_firetv.py
       - name: Build debug APK
