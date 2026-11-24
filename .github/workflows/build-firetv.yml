@@ -2,9 +2,6 @@ name: Build experimental Fire TV BLE APK
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 permissions:
   contents: read
