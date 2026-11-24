@@ -15,5 +15,18 @@ new = """        // Experimental Amazon manufacturer data. NOT verified as a Fir
                 .build();"""
 if s.count(old) != 1:
     raise SystemExit("Source changed: expected advertising block not found exactly once")
-p.write_text(s.replace(old,new), encoding="utf-8")
+s = s.replace(old, new)
+# Make BLE advertising success/failure visible on the phone.
+success = '            Log.i("BLE", "Advertisement started successfully");'
+failure = '            Log.i("BLE", "Advertisement not started - error: " + errorCode);'
+if s.count(success) != 1 or s.count(failure) != 1:
+    raise SystemExit("Advertising callbacks changed")
+s = s.replace(success, success + '\\n            new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(getApplicationContext(), "BLE advertising ACTIVE", Toast.LENGTH_LONG).show());')
+s = s.replace(failure, failure + '\\n            new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(getApplicationContext(), "BLE advertising FAILED: " + errorCode, Toast.LENGTH_LONG).show());')
+# Explicitly report when advertising cannot start before the callback.
+notready = '            Log.d("BLE", "GATT Database not fully registered yet, postponing startAdvertising()");'
+if s.count(notready) != 1:
+    raise SystemExit("GATT readiness check changed")
+s = s.replace(notready, notready + '\\n            new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(getApplicationContext(), "BLE waiting for GATT initialization", Toast.LENGTH_LONG).show());')
+p.write_text(s, encoding="utf-8")
 print("Patched:",p)
